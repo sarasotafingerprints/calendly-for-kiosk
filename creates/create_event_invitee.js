@@ -1,13 +1,12 @@
 const perform = async (z, bundle) => {
   const options = {
-    url: bundle.inputData.scheduling_url,
+    url: 'https://eorwekcmghk59i4.m.pipedream.net',
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      //'Authorization': `Bearer ${bundle.authData.access_token}`
+      'Content-Type': 'application/json',
     },
     params: {},
-    form: {
+    body: {
       first_name: bundle.inputData.first_name,
       last_name: bundle.inputData.last_name,
       email: bundle.inputData.email,

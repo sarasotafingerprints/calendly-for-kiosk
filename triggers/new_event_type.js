@@ -1,52 +1,49 @@
 const perform = async (z, bundle) => {
-  return Promise.resolve()
-    .then(() => {
-      if (bundle.meta.page === 0) {
-        // first page, no need to fetch a cursor
-        return Promise.resolve();
-      } else {
-        return z.cursor.get(); // Promise<string | null>
-      }
-    })
-    .then((cursor) => {
-      const options = {
-        url: 'https://api.calendly.com/event_types',
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${bundle.authData.access_token}`,
-        },
-        params: {
-          organization: bundle.authData.organization,
-          user: bundle.authData.owner,
-          sort: 'name:asc',
-          count: 100,
-          cursor,
-        },
-      };
+  let cursor;
 
-      return z.request(options);
-    })
-    .then((response) => {
-      response.throwForStatus();
-      const results = response.json;
+  // if fetching a page other than the first (first page is 0),
+  // get the cursor stored after fetching the previous page.
+  if (bundle.meta.page > 0) {
+    cursor = await z.cursor.get();
 
-      for (let [key, obj] of results.collection.entries()) {
-        let { uri, ...rest } = obj;
-        results.collection[key] = { id: uri, ...rest };
-      }
+    // if the previous page was the last one and cursor is empty/null,
+    // return an empty array.
+    if (!cursor) {
+      return [];
+    }
+  }
 
-      // You can do any parsing you need for results here before returning them
+  const options = {
+    url: cursor ? cursor : 'https://api.calendly.com/event_types',
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${bundle.authData.access_token}`,
+    },
+    params: {
+      organization: bundle.authData.organization,
+      user: bundle.authData.owner,
+      sort: 'name:asc',
+      count: 100,
+    },
+  };
 
-      // need to save the cursor and return a promise, but also need to pass the data along
-      return Promise.all([
-        results.collection,
-        z.cursor.set({ page_token: results.pagination.next_page_token }),
-      ]);
-    })
-    .then(([items /* null */]) => {
-      return items;
-    });
+  const response = await z.request(options);
+
+  z.console.log(response.json.pagination);
+
+  for (let [key, obj] of response.json.collection.entries()) {
+    let { uri, ...rest } = obj;
+    response.json.collection[key] = {
+      id: uri,
+      ...rest,
+    };
+  }
+  if (response.json.pagination.next_page) {
+    await z.cursor.set(response.json.pagination.next_page);
+  }
+
+  return response.json.collection;
 };
 
 module.exports = {
@@ -84,30 +81,7 @@ module.exports = {
       type: 'StandardEventType',
       updated_at: '2023-05-18T20:53:36.708850Z',
     },
-    outputFields: [
-      { key: 'id' },
-      { key: 'active' },
-      { key: 'admin_managed' },
-      { key: 'booking_method' },
-      { key: 'color' },
-      { key: 'created_at' },
-      { key: 'deleted_at' },
-      { key: 'description_html' },
-      { key: 'description_plain' },
-      { key: 'duration' },
-      { key: 'internal_note' },
-      { key: 'kind' },
-      { key: 'name' },
-      { key: 'pooling_type' },
-      { key: 'profile__name' },
-      { key: 'profile__owner' },
-      { key: 'profile__type' },
-      { key: 'scheduling_url' },
-      { key: 'secret' },
-      { key: 'slug' },
-      { key: 'type' },
-      { key: 'updated_at' },
-    ],
+    outputFields: [{ key: 'id' }, { key: 'name' }],
   },
   display: {
     description:

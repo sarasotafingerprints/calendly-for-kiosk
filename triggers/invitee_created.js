@@ -1,7 +1,18 @@
 const perform = async (z, bundle) => {
   bundle.cleanedRequest.payload.id = bundle.cleanedRequest.payload.uri;
 
-  return [bundle.cleanedRequest.payload];
+  if (
+    bundle.inputData.event_type_uuids.includes(
+      bundle.cleanedRequest.payload.scheduled_event.event_type.replace(
+        /^(.*[\\\/])/,
+        ''
+      )
+    )
+  ) {
+    return [bundle.cleanedRequest.payload];
+  }
+
+  return [];
 };
 
 const performUnsubscribe = async (z, bundle) => {
@@ -20,8 +31,6 @@ const performUnsubscribe = async (z, bundle) => {
   return z.request(options).then((response) => {
     response.throwForStatus();
     const results = response.json;
-
-    // You can do any parsing you need for results here before returning them
 
     return results;
   });
@@ -42,19 +51,78 @@ const performSubscribe = async (z, bundle) => {
       events: ['invitee.created'],
       organization: bundle.authData.organization,
       user: bundle.authData.owner,
-      scope: 'user',
+      scope: bundle.inputData.scope,
     },
   };
 
   return z.request(options).then((response) => {
     response.throwForStatus();
     const results = response.json;
+    results.resource.id = results.resource.uri.replace(/^(.*[\\\/])/, '');
 
-    // store the uuid as id
-    results.id = results.uri.split('/').pop();
-
-    return results;
+    return results.resource;
   });
+};
+
+const performList = async (z, bundle) => {
+  const scope = bundle.inputData.scope;
+  const scopeValue =
+    scope == 'user' ? bundle.authData.owner : bundle.authData.organization;
+
+  let options = {
+    url: 'https://api.calendly.com/scheduled_events/',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${bundle.authData.access_token}`,
+    },
+    params: {
+      [scope]: scopeValue,
+      count: 100,
+    },
+  };
+
+  const scheduled_events = await z
+    .request(options)
+    .then((results) => results.json.collection);
+
+  const invitee_results = [];
+
+  for (let [key, obj] of scheduled_events.entries()) {
+    let { uri, event_type, ...rest } = obj;
+    let uuid = uri.replace(/^(.*[\\\/])/, '');
+    let event_type_uuid = event_type.replace(/^(.*[\\\/])/, '');
+
+    if (bundle.inputData.event_type_uuids.includes(event_type_uuid)) {
+      continue;
+    }
+
+    options = {
+      url: `https://api.calendly.com/scheduled_events/${uuid}/invitees`,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${bundle.authData.access_token}`,
+      },
+      params: {
+        status: 'active',
+      },
+    };
+    const invitees = z.request(options).then((results) => {
+      for (let [key, obj] of results.json.collection.entries()) {
+        let { uri, ...rest } = obj;
+        let uuid = uri.replace(/^(.*[\\\/])/, '');
+        results.json.collection[key].id = uuid;
+      }
+      return results.json.collection;
+    });
+
+    invitee_results.push(invitees);
+  }
+
+  const output = await Promise.all(invitee_results);
+
+  return output.flat();
 };
 
 module.exports = {
@@ -63,7 +131,30 @@ module.exports = {
     type: 'hook',
     performUnsubscribe: performUnsubscribe,
     performSubscribe: performSubscribe,
-    canPaginate: false,
+    canPaginate: true,
+    inputFields: [
+      {
+        key: 'scope',
+        type: 'string',
+        label: 'Scope',
+        helpText: 'The scope to listen for new Invitees',
+        choices: ['user', 'organization'],
+        required: true,
+        list: false,
+        altersDynamicFields: true,
+      },
+      {
+        key: 'event_type_uuids',
+        type: 'string',
+        label: 'Event Types',
+        helpText: 'The uuids for the event to listen for new invitees',
+        dynamic: 'new_event_type.id.name',
+        required: true,
+        list: true,
+        altersDynamicFields: false,
+      },
+    ],
+    performList: performList,
   },
   display: {
     description: 'Triggers when a new invitee is created for an event',

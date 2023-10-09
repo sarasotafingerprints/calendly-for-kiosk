@@ -51,12 +51,12 @@ module.exports = {
         label: 'Event Type',
         type: 'string',
         helpText: 'The uri associated with the event type',
-        dynamic: 'new_event_type.id.name',
+        dynamic: 'new_event_type.name.name',
+        default:
+          'https://api.calendly.com/event_types/f6970b02-8dad-4102-8e99-483549aa3f4c',
         required: true,
         list: false,
         altersDynamicFields: false,
-        default:
-          'https://api.calendly.com/event_types/f6970b02-8dad-4102-8e99-483549aa3f4c',
       },
     ],
     sample: {
