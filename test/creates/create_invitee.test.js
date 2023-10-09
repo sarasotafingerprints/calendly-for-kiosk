@@ -6,12 +6,12 @@ const appTester = zapier.createAppTester(App);
 // read the `.env` file into the environment, if available
 zapier.tools.env.inject();
 
-describe('creates.create_event_invitee', () => {
+describe('creates.create_invitee', () => {
   it('should run', async () => {
     const bundle = { inputData: {} };
 
     const results = await appTester(
-      App.creates.create_event_invitee.operation.perform,
+      App.creates.create_invitee.operation.perform,
       bundle
     );
     expect(results).toBeDefined();

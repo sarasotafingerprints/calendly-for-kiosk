@@ -6,7 +6,7 @@ const newOrganizationMembershipTrigger = require('./triggers/new_organization_me
 const userAvailabilitySchedulesTrigger = require('./triggers/user_availability_schedules.js');
 const eventTypeAvailableTimesTrigger = require('./triggers/event_type_available_times.js');
 const createInviteeNoShowCreate = require('./creates/create_invitee_no_show.js');
-const createEventInviteeCreate = require('./creates/create_event_invitee.js');
+const createInviteeCreate = require('./creates/create_invitee.js');
 const getEventInviteeSearch = require('./searches/get_event_invitee.js');
 const listScheduledEventsSearch = require('./searches/list_scheduled_events.js');
 const scheduledEventsInviteesSearch = require('./searches/scheduled_events_invitees.js');
@@ -39,7 +39,7 @@ module.exports = {
   },
   creates: {
     [createInviteeNoShowCreate.key]: createInviteeNoShowCreate,
-    [createEventInviteeCreate.key]: createEventInviteeCreate,
+    [createInviteeCreate.key]: createInviteeCreate,
   },
   authentication: authentication,
 };

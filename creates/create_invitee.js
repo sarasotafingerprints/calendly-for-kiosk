@@ -1,15 +1,24 @@
 const perform = async (z, bundle) => {
+  //TODO: get event_url from event_type
+
+  //generate callback_url
+  const callbackUrl = z.generateCallbackUrl();
+
   const options = {
-    url: 'https://eorwekcmghk59i4.m.pipedream.net',
+    url: process.env.PIPEDREAM_TRIGGER_URL,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: `Bearer ${bundle.authData.access_token}`,
     },
     params: {},
     body: {
       first_name: bundle.inputData.first_name,
       last_name: bundle.inputData.last_name,
       email: bundle.inputData.email,
+      event_url: bundle.inputData.event_url,
+      callback_url: callbackUrl,
     },
   };
 
@@ -25,21 +34,20 @@ const perform = async (z, bundle) => {
 
 module.exports = {
   display: {
-    description:
-      'Creates an event invitee by posting form-data to a scheduling url',
+    description: 'Uses pipedream workflow to create an invitee.',
     hidden: false,
-    label: 'Create Event Invitee',
+    label: 'Create Invitee',
   },
-  key: 'create_event_invitee',
-  noun: 'Event_Invitee',
+  key: 'create_invitee',
+  noun: 'Invitee',
   operation: {
     inputFields: [
       {
-        key: 'scheduling_url',
-        label: 'Scheduling Url',
+        key: 'event_type',
+        label: 'Event Type',
         type: 'string',
-        dynamic: 'event_type_available_times.id.start_time',
-        required: true,
+        dynamic: 'new_event_type.id.name',
+        required: false,
         list: false,
         altersDynamicFields: false,
       },
