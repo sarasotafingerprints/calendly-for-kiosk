@@ -1,6 +1,11 @@
 const perform = async (z, bundle) => {
   //TODO: get event_url from event_type
-
+  if(bundle.meta.isLoadingSample)
+  {
+    return {
+      uuid: 'sample data'
+    }
+  }
   //generate callback_url
   const callbackUrl = z.generateCallbackUrl();
 
@@ -30,6 +35,11 @@ const perform = async (z, bundle) => {
 
     return results;
   });
+};
+
+const performResume = async (z, bundle) => {
+  // this will give a final value of: {"hello": "world", "foo": "bar"}
+  return  { ...bundle.outputData, ...bundle.cleanedRequest };
 };
 
 module.exports = {
@@ -77,5 +87,6 @@ module.exports = {
       },
     ],
     perform: perform,
+    performResume: performResume
   },
 };
