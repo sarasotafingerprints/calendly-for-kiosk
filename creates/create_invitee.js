@@ -53,11 +53,10 @@ module.exports = {
   operation: {
     inputFields: [
       {
-        key: 'event_type',
-        label: 'Event Type',
+        key: 'event_url',
+        label: 'Event URL',
         type: 'string',
-        dynamic: 'new_event_type.id.name',
-        required: false,
+        required: true,
         list: false,
         altersDynamicFields: false,
       },
