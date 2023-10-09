@@ -1,14 +1,6 @@
 const perform = async (z, bundle) => {
-  //TODO: get event_url from event_type
-  if(bundle.meta.isLoadingSample)
-  {
-    return {
-      uuid: 'sample data'
-    }
-  }
-  //generate callback_url
-  const callbackUrl = z.generateCallbackUrl();
-
+  const callbackUrl = bundle.meta.isLoadingSample ? null : z.generateCallbackUrl();
+  
   const options = {
     url: process.env.PIPEDREAM_TRIGGER_URL,
     method: 'POST',
@@ -31,7 +23,10 @@ const perform = async (z, bundle) => {
     response.throwForStatus();
     const results = response.json;
 
-    // You can do any parsing you need for results here before returning them
+    if(bundle.meta.isLoadingSample)
+    {
+      return {...results, success: true, errorMessage: '', invitee_uuid: 'sample data'}
+    }
 
     return results;
   });
