@@ -1,6 +1,8 @@
 const perform = async (z, bundle) => {
-  const callbackUrl = bundle.meta.isLoadingSample ? null : z.generateCallbackUrl();
-  
+  const callbackUrl = bundle.meta.isLoadingSample
+    ? null
+    : z.generateCallbackUrl();
+
   const options = {
     url: process.env.PIPEDREAM_TRIGGER_URL,
     method: 'POST',
@@ -23,9 +25,13 @@ const perform = async (z, bundle) => {
     response.throwForStatus();
     const results = response.json;
 
-    if(bundle.meta.isLoadingSample)
-    {
-      return {...results, success: true, errorMessage: '', invitee_uuid: 'sample data'}
+    if (bundle.meta.isLoadingSample) {
+      return {
+        ...results,
+        success: true,
+        errorMessage: '',
+        invitee_uuid: 'sample data',
+      };
     }
 
     return results;
@@ -33,7 +39,6 @@ const perform = async (z, bundle) => {
 };
 
 const performResume = async (z, bundle) => {
-  // this will give a final value of: {"hello": "world", "foo": "bar"}
   return  { ...bundle.outputData, ...bundle.cleanedRequest };
 };
 
@@ -48,10 +53,11 @@ module.exports = {
   operation: {
     inputFields: [
       {
-        key: 'event_url',
-        label: 'Event URL',
+        key: 'event_type',
+        label: 'Event Type',
         type: 'string',
-        required: true,
+        dynamic: 'new_event_type.id.name',
+        required: false,
         list: false,
         altersDynamicFields: false,
       },

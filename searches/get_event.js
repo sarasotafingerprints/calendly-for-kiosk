@@ -24,7 +24,7 @@ module.exports = {
   display: {
     description: 'Returns information about a specified Event.',
     hidden: false,
-    label: 'Get Event',
+    label: 'Get Scheduled Event',
   },
   key: 'get_event',
   noun: 'Event',
