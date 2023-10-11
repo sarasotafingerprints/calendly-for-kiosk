@@ -4,7 +4,7 @@
   "description": "A Calendly integration that works with webhooks.",
   "main": "index.js",
   "scripts": {
-    "env": "yarn env-template.js",
+    "env": "yarn env.js",
     "test": "jest --testTimeout 10000"
   },
   "engines": {
