@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const authentication = require('./authentication');
 const inviteeCreatedTrigger = require('./triggers/invitee_created.js');
 const inviteeNoShowTrigger = require('./triggers/invitee_no_show.js');
