@@ -14,7 +14,7 @@ const perform = async (z, bundle) => {
       last_name: bundle.inputData.last_name,
       email: bundle.inputData.email,
       event_url: bundle.inputData.event_url,
-      callback_url: bundle.meta.isLoadingSample ? null : z.generateCallbackUrl();,
+      callback_url: bundle.meta.isLoadingSample ? null : z.generateCallbackUrl()
     },
   };
 
@@ -32,7 +32,7 @@ const perform = async (z, bundle) => {
 };
 
 const performResume = async (z, bundle) => {
-  return  { ...bundle.outputData, ...bundle.cleanedRequest };
+  return  { ...bundle.outputData, ...bundle.cleanedRequest }
 };
 
 module.exports = {
@@ -81,4 +81,4 @@ module.exports = {
     perform: perform,
     performResume: performResume
   },
-};
+}
