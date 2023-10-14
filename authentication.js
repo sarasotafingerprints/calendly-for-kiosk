@@ -20,7 +20,11 @@ const test = async (z, bundle) => {
 };
 
 const getAccessToken = async (z, bundle) => {
-  const encodedString = Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64');
+  const encodedString = new Buffer(
+    `${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`
+  ).toString('base64');
+
+  z.console.log(encodedString);
 
   const options = {
     url: 'https://auth.calendly.com/oauth/token',
